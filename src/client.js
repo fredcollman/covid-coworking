@@ -4,17 +4,23 @@ const ctx = canvas.getContext("2d");
 
 const position = { x: 100, y: 100 };
 const speed = { x: 0, y: 0 };
+const maxSpeed = 1;
+const playerSize = { x: 50, y: 50 };
+let lastTime = 0;
 
-const updatePosition = () => {
-  position.x += speed.x;
-  position.y += speed.y;
+const updatePosition = (deltaTime) => {
+  position.x += speed.x * deltaTime;
+  position.y += speed.y * deltaTime;
+  position.x = Math.max(0, Math.min(canvas.width - playerSize.x, position.x));
+  position.y = Math.max(0, Math.min(canvas.height - playerSize.y, position.y));
 };
 
 const draw = (timestamp) => {
-  updatePosition();
+  updatePosition(timestamp - lastTime);
+  lastTime = timestamp;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#f00";
-  ctx.fillRect(position.x, position.y, 50, 50);
+  ctx.fillRect(position.x, position.y, playerSize.x, playerSize.y);
 };
 
 const loopForever = (callback) => {
@@ -40,16 +46,16 @@ const receiveInput = (handlers) => (event) => {
 
 const downHandlers = {
   left: () => {
-    speed.x = -5;
+    speed.x = -maxSpeed;
   },
   right: () => {
-    speed.x = 5;
+    speed.x = maxSpeed;
   },
   up: () => {
-    speed.y = -5;
+    speed.y = -maxSpeed;
   },
   down: () => {
-    speed.y = 5;
+    speed.y = maxSpeed;
   },
 };
 
