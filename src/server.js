@@ -12,7 +12,8 @@ app.use(express.static("."));
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.on("position", (position) => {
-    console.log(`position: ${position}`);
+    console.log(`position x: ${position.x}, y: ${position.y}`);
+    socket.broadcast.emit("receivePosition", position);
   });
   socket.on("disconnect", () => {
     console.log("a user disconnected");

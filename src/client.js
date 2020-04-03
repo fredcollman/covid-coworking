@@ -21,7 +21,7 @@ const newPosition = (deltaTime) =>
   });
 
 const notifyPosition = () => {
-  socket.emit("position", JSON.stringify(position));
+  socket.emit("position", position);
 };
 
 const draw = (timestamp) => {
@@ -94,3 +94,6 @@ const upHandlers = {
 loopForever(tick);
 document.addEventListener("keydown", receiveInput(downHandlers));
 document.addEventListener("keyup", receiveInput(upHandlers));
+socket.on("receivePosition", (received) => {
+  position = received;
+});
