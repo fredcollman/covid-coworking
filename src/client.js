@@ -12,6 +12,8 @@ const player = {
   speed: { x: 0, y: 0 },
 };
 
+const otherPlayers = new Map();
+
 const constrain = (idealPosition) => ({
   x: Math.max(0, Math.min(canvas.width - player.size.x, idealPosition.x)),
   y: Math.max(0, Math.min(canvas.height - player.size.y, idealPosition.y)),
@@ -28,11 +30,24 @@ const notifyPosition = () => {
 };
 
 const receivePosition = (received) => {
-  player.position = received.position;
+  const updated = otherPlayers.get(received.id);
+  if (updated) {
+    updated.position = received.position;
+  } else {
+    otherPlayers.set(received.id, {
+      size: { x: 20, y: 50 },
+      color: "#00f",
+      position: received.position,
+    });
+  }
 };
 
 const draw = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  otherPlayers.forEach((p) => {
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.position.x, p.position.y, p.size.x, p.size.y);
+  });
   ctx.fillStyle = player.color;
   ctx.fillRect(
     player.position.x,
