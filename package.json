@@ -36,6 +36,10 @@
     "mocha": "^7.1.1",
     "prettier": "^2.0.2",
     "regenerator-runtime": "^0.13.5",
-    "rollup": "^2.3.2"
+    "rollup": "^2.3.2",
+    "stylelint": "^13.2.1",
+    "stylelint-config-prettier": "^8.0.1",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-prettier": "^1.1.2"
   }
 }
