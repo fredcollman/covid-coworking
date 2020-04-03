@@ -4,6 +4,7 @@
   "description": "Virtual office chatroom",
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.esm.js",
+  "type": "module",
   "author": "Fred Collman <fredcollman@gmail.com>",
   "license": "MIT",
   "repository": "fredcollman/covid-coworking",
@@ -41,5 +42,9 @@
     "stylelint-config-prettier": "^8.0.1",
     "stylelint-config-standard": "^20.0.0",
     "stylelint-prettier": "^1.1.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
   }
 }
