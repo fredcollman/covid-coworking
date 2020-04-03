@@ -3,37 +3,52 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const socket = io();
 
-let position = { x: 100, y: 100 };
-const speed = { x: 0, y: 0 };
 const maxSpeed = 1;
-const playerSize = { x: 20, y: 50 };
 let lastTime = 0;
+const player = {
+  size: { x: 20, y: 50 },
+  color: "#f00",
+  position: { x: 100, y: 100 },
+  speed: { x: 0, y: 0 },
+};
 
 const constrain = (idealPosition) => ({
-  x: Math.max(0, Math.min(canvas.width - playerSize.x, idealPosition.x)),
-  y: Math.max(0, Math.min(canvas.height - playerSize.y, idealPosition.y)),
+  x: Math.max(0, Math.min(canvas.width - player.size.x, idealPosition.x)),
+  y: Math.max(0, Math.min(canvas.height - player.size.y, idealPosition.y)),
 });
 
 const newPosition = (deltaTime) =>
   constrain({
-    x: position.x + speed.x * deltaTime,
-    y: position.y + speed.y * deltaTime,
+    x: player.position.x + player.speed.x * deltaTime,
+    y: player.position.y + player.speed.y * deltaTime,
   });
 
 const notifyPosition = () => {
-  socket.emit("position", position);
+  socket.emit("position", player.position);
+};
+
+const receivePosition = (received) => {
+  player.position = received.position;
 };
 
 const draw = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#f00";
-  ctx.fillRect(position.x, position.y, playerSize.x, playerSize.y);
+  ctx.fillStyle = player.color;
+  ctx.fillRect(
+    player.position.x,
+    player.position.y,
+    player.size.x,
+    player.size.y
+  );
 };
 
 const tick = (timestamp) => {
-  const oldPosition = position;
-  position = newPosition(timestamp - lastTime);
-  if (position.x !== oldPosition.x || position.y !== oldPosition.y) {
+  const oldPosition = player.position;
+  player.position = newPosition(timestamp - lastTime);
+  if (
+    player.position.x !== oldPosition.x ||
+    player.position.y !== oldPosition.y
+  ) {
     notifyPosition();
   }
   lastTime = timestamp;
@@ -63,37 +78,35 @@ const receiveInput = (handlers) => (event) => {
 
 const downHandlers = {
   left: () => {
-    speed.x = -maxSpeed;
+    player.speed.x = -maxSpeed;
   },
   right: () => {
-    speed.x = maxSpeed;
+    player.speed.x = maxSpeed;
   },
   up: () => {
-    speed.y = -maxSpeed;
+    player.speed.y = -maxSpeed;
   },
   down: () => {
-    speed.y = maxSpeed;
+    player.speed.y = maxSpeed;
   },
 };
 
 const upHandlers = {
   left: () => {
-    speed.x = Math.max(0, speed.x);
+    player.speed.x = Math.max(0, player.speed.x);
   },
   right: () => {
-    speed.x = Math.min(0, speed.x);
+    player.speed.x = Math.min(0, player.speed.x);
   },
   up: () => {
-    speed.y = Math.max(0, speed.y);
+    player.speed.y = Math.max(0, player.speed.y);
   },
   down: () => {
-    speed.y = Math.min(0, speed.y);
+    player.speed.y = Math.min(0, player.speed.y);
   },
 };
 
 loopForever(tick);
 document.addEventListener("keydown", receiveInput(downHandlers));
 document.addEventListener("keyup", receiveInput(upHandlers));
-socket.on("receivePosition", (received) => {
-  position = received;
-});
+socket.on("receivePosition", receivePosition);
