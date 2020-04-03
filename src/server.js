@@ -1,11 +1,23 @@
 // @flow
 import express from "express";
 import http from "http";
+import sockets from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
+const io = sockets(server);
 
-app.use(express.static('.'));
+app.use(express.static("."));
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.on("position", (position) => {
+    console.log(`position: ${position}`);
+  });
+  socket.on("disconnect", () => {
+    console.log("a user disconnected");
+  });
+});
 
 server.listen(3000, () => {
   console.log("listening on port 3000");

@@ -1,26 +1,43 @@
 // flow
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+const socket = io();
 
-const position = { x: 100, y: 100 };
+let position = { x: 100, y: 100 };
 const speed = { x: 0, y: 0 };
 const maxSpeed = 1;
-const playerSize = { x: 50, y: 50 };
+const playerSize = { x: 20, y: 50 };
 let lastTime = 0;
 
-const updatePosition = (deltaTime) => {
-  position.x += speed.x * deltaTime;
-  position.y += speed.y * deltaTime;
-  position.x = Math.max(0, Math.min(canvas.width - playerSize.x, position.x));
-  position.y = Math.max(0, Math.min(canvas.height - playerSize.y, position.y));
+const constrain = (idealPosition) => ({
+  x: Math.max(0, Math.min(canvas.width - playerSize.x, idealPosition.x)),
+  y: Math.max(0, Math.min(canvas.height - playerSize.y, idealPosition.y)),
+});
+
+const newPosition = (deltaTime) =>
+  constrain({
+    x: position.x + speed.x * deltaTime,
+    y: position.y + speed.y * deltaTime,
+  });
+
+const notifyPosition = () => {
+  socket.emit("position", JSON.stringify(position));
 };
 
 const draw = (timestamp) => {
-  updatePosition(timestamp - lastTime);
-  lastTime = timestamp;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#f00";
   ctx.fillRect(position.x, position.y, playerSize.x, playerSize.y);
+};
+
+const tick = (timestamp) => {
+  const oldPosition = position;
+  position = newPosition(timestamp - lastTime);
+  if (position.x !== oldPosition.x || position.y !== oldPosition.y) {
+    notifyPosition();
+  }
+  lastTime = timestamp;
+  draw(timestamp);
 };
 
 const loopForever = (callback) => {
@@ -74,6 +91,6 @@ const upHandlers = {
   },
 };
 
-loopForever(draw);
+loopForever(tick);
 document.addEventListener("keydown", receiveInput(downHandlers));
 document.addEventListener("keyup", receiveInput(upHandlers));
