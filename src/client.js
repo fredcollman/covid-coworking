@@ -5,9 +5,13 @@ const ctx = canvas.getContext("2d");
 const position = { x: 100, y: 100 };
 const speed = { x: 0, y: 0 };
 
-const draw = (timestamp) => {
+const updatePosition = () => {
   position.x += speed.x;
   position.y += speed.y;
+};
+
+const draw = (timestamp) => {
+  updatePosition();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#f00";
   ctx.fillRect(position.x, position.y, 50, 50);
@@ -51,16 +55,16 @@ const downHandlers = {
 
 const upHandlers = {
   left: () => {
-    speed.x = 0;
+    speed.x = Math.max(0, speed.x);
   },
   right: () => {
-    speed.x = 0;
+    speed.x = Math.min(0, speed.x);
   },
   up: () => {
-    speed.y = 0;
+    speed.y = Math.max(0, speed.y);
   },
   down: () => {
-    speed.y = 0;
+    speed.y = Math.min(0, speed.y);
   },
 };
 
