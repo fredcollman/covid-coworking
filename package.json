@@ -1,7 +1,7 @@
 {
   "name": "covid-coworking",
   "version": "1.0.0",
-  "description": "Virtual office chatroom",
+  "description": "Virtual office simulator",
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.esm.js",
   "type": "module",
