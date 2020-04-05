@@ -16,7 +16,8 @@
     "lint": "eslint src/**/*.js",
     "compile": "rollup --config",
     "libdefs": "flow-typed install",
-    "prepublishOnly": "yarn run compile && yarn run test"
+    "prepublishOnly": "yarn run compile && yarn run test",
+    "start": "node src/server.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
