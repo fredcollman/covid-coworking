@@ -12,7 +12,7 @@ app.use(express.static("."));
 io.on("connection", (socket) => {
   console.log("a user connected");
   socket.on("position", (position) => {
-    console.log(`[player ${socket.id}] x: ${position.x}, y: ${position.y}`);
+    // console.log(`[player ${socket.id}] x: ${position.x}, y: ${position.y}`);
     socket.broadcast.emit("receivePosition", {
       player: {
         id: socket.id,
