@@ -30,14 +30,26 @@ const updatePosition = (socket) => (position) => {
   });
 };
 
+const broadcastMessage = (socket) => ({ emoji }) => {
+  socket.broadcast.emit("message", {
+    player: {
+      id: socket.id,
+    },
+    emoji,
+  });
+};
+
 const handleDisconnect = (socket) => () => {
   console.log(`[${socket.id}] user disconnected`);
+  io.emit("destroyPlayer", { player: { id: socket.id } });
 };
 
 io.on("connection", (socket) => {
   console.log(`[${socket.id}] user connected`);
+  updatePosition(socket)({ x: 100, y: 100 });
   socket.on("character", updateCharacter(socket));
   socket.on("position", updatePosition(socket));
+  socket.on("message", broadcastMessage(socket));
   socket.on("disconnect", handleDisconnect(socket));
 });
 

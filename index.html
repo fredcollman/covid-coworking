@@ -12,13 +12,25 @@
         <label>
           Name: <input type="text" name="name" id="character-name" />
         </label>
-        <label>Colour: <input type="color" name="color" id="character-color" />
+        <label>
+          Colour: <input type="color" name="color" id="character-color" />
         </label>
         <button type="submit">Update</button>
       </fieldset>
     </form>
-    <canvas id="game" height="900" width="1600"/>
-      <script src="/socket.io/socket.io.js"></script>
-      <script src="src/client.js"></script>
+    <canvas id="game" height="900" width="1600" ></canvas>
+    <form id="emote">
+      <fieldset>
+        <legend>Send a message</legend>
+        <button type="button">👍</button>
+        <button type="button">👎</button>
+        <button type="button">🔥</button>
+        <button type="button">🐧</button>
+        <button type="button">😂</button>
+        <button type="button">😍</button>
+      </fieldset>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="src/client.js"></script>
   </body>
 </html>

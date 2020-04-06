@@ -1,6 +1,7 @@
 // flow
 const canvas = document.getElementById("game");
 const characterForm = document.getElementById("character");
+const emoteForm = document.getElementById("emote");
 const ctx = canvas.getContext("2d");
 const socket = io();
 
@@ -12,11 +13,15 @@ const player = {
   position: { x: 100, y: 100 },
   speed: { x: 0, y: 0 },
   name: "",
+  message: null,
 };
 const otherPlayers = new Map();
 
 const randomColor = () =>
-  "#" + Math.floor(Math.random() * 16777215).toString(16);
+  "#" +
+  Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, "0");
 
 const updatePlayer = ({ name, color }) => {
   player.name = name;
@@ -41,6 +46,16 @@ const notifyPosition = () => {
   socket.emit("position", player.position);
 };
 
+const emote = (event) => {
+  if (event.target.type === "button") {
+    socket.emit("message", { emoji: event.target.innerText });
+    player.message = {
+      emoji: event.target.innerText,
+      expiry: new Date().getTime() + 5000,
+    };
+  }
+};
+
 const receivePosition = (received) => {
   const playerId = received.player.id;
   const updated = otherPlayers.get(playerId);
@@ -59,23 +74,35 @@ const receivePosition = (received) => {
 const updateCharacter = (received) => {
   const playerId = received.player.id;
   const updated = otherPlayers.get(playerId);
-  console.log("updateCharacter", updated);
   if (updated) {
     updated.name = received.player.name;
     updated.color = received.player.color;
   }
 };
 
+const destroyPlayer = (received) => {
+  otherPlayers.delete(received.player.id);
+};
+
 const drawSomeone = (char) => {
   ctx.fillStyle = char.color;
   ctx.textAlign = "center";
-  ctx.font = "24px serif";
+  ctx.font =
+    '24px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif';
   ctx.fillRect(char.position.x, char.position.y, char.size.x, char.size.y);
   ctx.fillText(
     char.name,
     char.position.x + char.size.x / 2,
     char.position.y + char.size.y + 24
   );
+  if (char.message && char.message.expiry > new Date().getTime()) {
+    ctx.textAlign = "left";
+    ctx.fillText(
+      char.message.emoji,
+      char.position.x + char.size.x + 10,
+      char.position.y + 10
+    );
+  }
 };
 
 const draw = (timestamp) => {
@@ -158,6 +185,7 @@ const init = () => {
   document.addEventListener("keyup", receiveInput(upHandlers));
   socket.on("receivePosition", receivePosition);
   socket.on("updateCharacter", updateCharacter);
+  socket.on("destroyPlayer", destroyPlayer);
   characterForm.addEventListener("submit", (event) => {
     event.preventDefault();
     updatePlayer({
@@ -165,6 +193,7 @@ const init = () => {
       color: event.target.color.value,
     });
   });
+  emoteForm.addEventListener("click", emote);
 };
 
 init();
