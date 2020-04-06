@@ -9,20 +9,36 @@ const io = sockets(server);
 
 app.use(express.static("."));
 
+const updateCharacter = (socket) => ({ name, color }) => {
+  console.log(`[${socket.id}] user name: ${name}, color: ${color}`);
+  socket.broadcast.emit("updateCharacter", {
+    player: {
+      id: socket.id,
+      name,
+      color,
+    },
+  });
+};
+
+const updatePosition = (socket) => (position) => {
+  // console.log(`[${socket.id}] x: ${position.x}, y: ${position.y}`);
+  socket.broadcast.emit("receivePosition", {
+    player: {
+      id: socket.id,
+    },
+    position,
+  });
+};
+
+const handleDisconnect = (socket) => () => {
+  console.log(`[${socket.id}] user disconnected`);
+};
+
 io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("position", (position) => {
-    // console.log(`[player ${socket.id}] x: ${position.x}, y: ${position.y}`);
-    socket.broadcast.emit("receivePosition", {
-      player: {
-        id: socket.id,
-      },
-      position,
-    });
-  });
-  socket.on("disconnect", () => {
-    console.log("a user disconnected");
-  });
+  console.log(`[${socket.id}] user connected`);
+  socket.on("character", updateCharacter(socket));
+  socket.on("position", updatePosition(socket));
+  socket.on("disconnect", handleDisconnect(socket));
 });
 
 server.listen(5000, () => {

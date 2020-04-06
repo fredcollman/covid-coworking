@@ -1,5 +1,6 @@
 // flow
 const canvas = document.getElementById("game");
+const characterForm = document.getElementById("character");
 const ctx = canvas.getContext("2d");
 const socket = io();
 
@@ -7,18 +8,23 @@ const maxSpeed = 1;
 let lastTime = 0;
 const player = {
   size: { x: 20, y: 50 },
-  color: "#f00",
+  color: "#000",
   position: { x: 100, y: 100 },
   speed: { x: 0, y: 0 },
-  name: "bob",
+  name: "",
 };
+const otherPlayers = new Map();
+
+const randomColor = () =>
+  "#" + Math.floor(Math.random() * 16777215).toString(16);
 
 const updatePlayer = ({ name, color }) => {
   player.name = name;
   player.color = color;
+  characterForm.name.value = name;
+  characterForm.color.value = color;
+  socket.emit("character", { name, color });
 };
-
-const otherPlayers = new Map();
 
 const constrain = (idealPosition) => ({
   x: Math.max(0, Math.min(canvas.width - player.size.x, idealPosition.x)),
@@ -36,16 +42,27 @@ const notifyPosition = () => {
 };
 
 const receivePosition = (received) => {
-  const updated = otherPlayers.get(received.id);
+  const playerId = received.player.id;
+  const updated = otherPlayers.get(playerId);
   if (updated) {
     updated.position = received.position;
   } else {
-    otherPlayers.set(received.id, {
+    otherPlayers.set(playerId, {
       size: { x: 20, y: 50 },
-      color: "#00f",
+      color: "#ccc",
       position: received.position,
-      name: "jenny",
+      name: "?",
     });
+  }
+};
+
+const updateCharacter = (received) => {
+  const playerId = received.player.id;
+  const updated = otherPlayers.get(playerId);
+  console.log("updateCharacter", updated);
+  if (updated) {
+    updated.name = received.player.name;
+    updated.color = received.player.color;
   }
 };
 
@@ -131,14 +148,23 @@ const upHandlers = {
   },
 };
 
-loopForever(tick);
-document.addEventListener("keydown", receiveInput(downHandlers));
-document.addEventListener("keyup", receiveInput(upHandlers));
-socket.on("receivePosition", receivePosition);
-document.querySelector("form#character").addEventListener("submit", (event) => {
-  event.preventDefault();
+const init = () => {
   updatePlayer({
-    name: event.target.name.value,
-    color: event.target.color.value,
+    name: "bob",
+    color: randomColor(),
   });
-});
+  loopForever(tick);
+  document.addEventListener("keydown", receiveInput(downHandlers));
+  document.addEventListener("keyup", receiveInput(upHandlers));
+  socket.on("receivePosition", receivePosition);
+  socket.on("updateCharacter", updateCharacter);
+  characterForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    updatePlayer({
+      name: event.target.name.value,
+      color: event.target.color.value,
+    });
+  });
+};
+
+init();
