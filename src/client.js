@@ -10,6 +10,7 @@ const player = {
   color: "#f00",
   position: { x: 100, y: 100 },
   speed: { x: 0, y: 0 },
+  name: "bob",
 };
 
 const otherPlayers = new Map();
@@ -38,23 +39,26 @@ const receivePosition = (received) => {
       size: { x: 20, y: 50 },
       color: "#00f",
       position: received.position,
+      name: "jenny",
     });
   }
 };
 
+const drawSomeone = (char) => {
+  ctx.fillStyle = char.color;
+  ctx.textAlign = "center";
+  ctx.fillRect(char.position.x, char.position.y, char.size.x, char.size.y);
+  ctx.fillText(
+    char.name,
+    char.position.x + char.size.x / 2,
+    char.position.y + char.size.y + 15
+  );
+};
+
 const draw = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  otherPlayers.forEach((p) => {
-    ctx.fillStyle = p.color;
-    ctx.fillRect(p.position.x, p.position.y, p.size.x, p.size.y);
-  });
-  ctx.fillStyle = player.color;
-  ctx.fillRect(
-    player.position.x,
-    player.position.y,
-    player.size.x,
-    player.size.y
-  );
+  otherPlayers.forEach(drawSomeone);
+  drawSomeone(player);
 };
 
 const tick = (timestamp) => {
