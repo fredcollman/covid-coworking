@@ -13,6 +13,11 @@ const player = {
   name: "bob",
 };
 
+const updatePlayer = ({ name, color }) => {
+  player.name = name;
+  player.color = color;
+};
+
 const otherPlayers = new Map();
 
 const constrain = (idealPosition) => ({
@@ -47,11 +52,12 @@ const receivePosition = (received) => {
 const drawSomeone = (char) => {
   ctx.fillStyle = char.color;
   ctx.textAlign = "center";
+  ctx.font = "24px serif";
   ctx.fillRect(char.position.x, char.position.y, char.size.x, char.size.y);
   ctx.fillText(
     char.name,
     char.position.x + char.size.x / 2,
-    char.position.y + char.size.y + 15
+    char.position.y + char.size.y + 24
   );
 };
 
@@ -129,3 +135,10 @@ loopForever(tick);
 document.addEventListener("keydown", receiveInput(downHandlers));
 document.addEventListener("keyup", receiveInput(upHandlers));
 socket.on("receivePosition", receivePosition);
+document.querySelector("form#character").addEventListener("submit", (event) => {
+  event.preventDefault();
+  updatePlayer({
+    name: event.target.name.value,
+    color: event.target.color.value,
+  });
+});
