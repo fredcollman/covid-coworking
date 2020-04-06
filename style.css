@@ -1,4 +1,16 @@
+body {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body > * {
+  margin: 1em;
+}
+
 #game {
   border: 1px solid black;
-  height: 90vmin;
+  max-height: 80vh;
+  max-width: 80vw;
 }

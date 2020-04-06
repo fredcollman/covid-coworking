@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>COVID Coworking</title>
-  <link rel="stylesheet" href="./style.css" />
-</head>
-<body>
-  <canvas id="game" height="900" width="1600"/>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="src/client.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <title>COVID Coworking</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <form id="character">
+      <fieldset>
+        <legend>Customise your character</legend>
+        <label>
+          Name: <input type="text" name="name" id="character-name" value="skeletor" />
+        </label>
+        <label>Colour: <input type="color" name="color" id="character-color" value="#ff0000"/>
+        </label>
+        <button type="submit">Update</button>
+      </fieldset>
+    </form>
+    <canvas id="game" height="900" width="1600"/>
+      <script src="/socket.io/socket.io.js"></script>
+      <script src="src/client.js"></script>
+  </body>
 </html>
