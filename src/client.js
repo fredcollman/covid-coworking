@@ -8,7 +8,7 @@ const socket = io();
 const maxSpeed = 1;
 let lastTime = 0;
 const player = {
-  size: { x: 20, y: 50 },
+  size: { x: 40, y: 100 },
   color: "#000",
   position: { x: 100, y: 100 },
   speed: { x: 0, y: 0 },
@@ -74,7 +74,7 @@ const receivePosition = (received) => {
     updated.position = received.position;
   } else {
     otherPlayers.set(playerId, {
-      size: { x: 20, y: 50 },
+      size: { x: 40, y: 100 },
       color: "#ccc",
       position: received.position,
       name: "?",
@@ -100,7 +100,12 @@ const drawSomeone = (char) => {
   ctx.textAlign = "center";
   ctx.font =
     '24px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif';
-  ctx.fillRect(char.position.x, char.position.y, char.size.x, char.size.y);
+  // ctx.fillRect(char.position.x, char.position.y, char.size.x, char.size.y);
+  ctx.drawImage(
+    document.getElementById("penguin"),
+    char.position.x,
+    char.position.y
+  );
   ctx.fillText(
     char.name,
     char.position.x + char.size.x / 2,
