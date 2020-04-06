@@ -56,6 +56,17 @@ const emote = (event) => {
   }
 };
 
+const receiveMessage = (received) => {
+  const playerId = received.player.id;
+  const updated = otherPlayers.get(playerId);
+  if (updated) {
+    updated.message = {
+      emoji: received.emoji,
+      expiry: new Date().getTime() + 5000,
+    };
+  }
+};
+
 const receivePosition = (received) => {
   const playerId = received.player.id;
   const updated = otherPlayers.get(playerId);
@@ -185,6 +196,7 @@ const init = () => {
   document.addEventListener("keyup", receiveInput(upHandlers));
   socket.on("receivePosition", receivePosition);
   socket.on("updateCharacter", updateCharacter);
+  socket.on("message", receiveMessage);
   socket.on("destroyPlayer", destroyPlayer);
   characterForm.addEventListener("submit", (event) => {
     event.preventDefault();
