@@ -40,16 +40,10 @@ const updatePlayer = ({ name, color }) => {
   socket.emit("character", { name, color });
 };
 
-const constrainCanvas = (idealPosition) => ({
-  x: Math.max(0, Math.min(canvas.width - player.size.x, idealPosition.x)),
-  y: Math.max(0, Math.min(canvas.height - player.size.y, idealPosition.y)),
+const newPosition = (deltaTime) => ({
+  x: player.position.x + player.speed.x * deltaTime,
+  y: player.position.y + player.speed.y * deltaTime,
 });
-
-const newPosition = (deltaTime) =>
-  constrainCanvas({
-    x: player.position.x + player.speed.x * deltaTime,
-    y: player.position.y + player.speed.y * deltaTime,
-  });
 
 const notifyPosition = () => {
   socket.emit("position", player.position);
@@ -172,6 +166,11 @@ const checkWallIntersection = (char) => (wall) => {
 const anyCollision = (walls) => (char) =>
   walls.some(checkWallIntersection(char));
 
+const charCenter = (char) => ({
+  x: char.position.x + char.size.x / 2,
+  y: char.position.y + char.size.y / 2,
+});
+
 const drawSomeone = (char) => {
   ctx.fillStyle = char.color;
   ctx.textAlign = "center";
@@ -194,7 +193,10 @@ const drawSomeone = (char) => {
 };
 
 const draw = (timestamp) => {
+  ctx.resetTransform();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const center = charCenter(player);
+  ctx.translate(canvas.width / 2 - center.x, canvas.height / 2 - center.y);
   walls.forEach(drawWall);
   otherPlayers.forEach(drawSomeone);
   drawSomeone(player);
@@ -226,15 +228,18 @@ const loopForever = (callback) => {
 };
 
 const receiveKeyboardInput = (handlers) => (event) => {
-  event.preventDefault();
   switch (event.keyCode) {
     case 37:
+      event.preventDefault();
       return handlers.left();
     case 38:
+      event.preventDefault();
       return handlers.up();
     case 39:
+      event.preventDefault();
       return handlers.right();
     case 40:
+      event.preventDefault();
       return handlers.down();
   }
 };
