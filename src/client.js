@@ -32,6 +32,7 @@ const updatePlayer = ({ name, color }) => {
   player.color = color;
   characterForm.name.value = name;
   characterForm.color.value = color;
+  localStorage.setItem("playerInfo", JSON.stringify({ name, color }));
   socket.emit("character", { name, color });
 };
 
@@ -416,7 +417,19 @@ const stopHandlers = {
   },
 };
 
+const loadState = () => {
+  const stored = localStorage.getItem("playerInfo");
+  if (stored) {
+    const loaded = JSON.parse(stored);
+    player.name = loaded.name || player.name;
+    player.color = loaded.color || player.color;
+  }
+  characterForm.name.value = player.name;
+  characterForm.color.value = player.color;
+};
+
 const init = () => {
+  loadState();
   join();
   buildWalls();
   loopForever(tick);
