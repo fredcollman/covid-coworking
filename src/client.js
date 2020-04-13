@@ -175,17 +175,24 @@ const receiveKeyboardInput = (handlers) => (event) => {
 };
 
 const receiveMouseEvent = (handlers) => (event) => {
-  const { top, left, width, height } = event.target.getBoundingClientRect();
-  if (event.clientX < left + touchRegionScale * width) {
-    handlers.left();
-  } else if (event.clientX > left + (1 - touchRegionScale) * width) {
-    handlers.right();
+  if (event.buttons) {
+    const { top, left, width, height } = event.target.getBoundingClientRect();
+    if (event.clientX < left + touchRegionScale * width) {
+      handlers.left();
+    } else if (event.clientX > left + (1 - touchRegionScale) * width) {
+      handlers.right();
+    }
+    if (event.clientY < top + touchRegionScale * height) {
+      handlers.up();
+    } else if (event.clientY > top + (1 - touchRegionScale) * height) {
+      handlers.down();
+    }
   }
-  if (event.clientY < top + touchRegionScale * height) {
-    handlers.up();
-  } else if (event.clientY > top + (1 - touchRegionScale) * height) {
-    handlers.down();
-  }
+};
+
+const stop = () => {
+  player.speed.x = 0;
+  player.speed.y = 0;
 };
 
 const downHandlers = {
@@ -227,7 +234,8 @@ const init = () => {
   document.addEventListener("keydown", receiveKeyboardInput(downHandlers));
   document.addEventListener("keyup", receiveKeyboardInput(upHandlers));
   canvas.addEventListener("mousedown", receiveMouseEvent(downHandlers));
-  canvas.addEventListener("mouseup", receiveMouseEvent(upHandlers));
+  canvas.addEventListener("mousemove", receiveMouseEvent(downHandlers));
+  canvas.addEventListener("mouseup", stop);
   socket.on("receivePosition", receivePosition);
   socket.on("updateCharacter", updateCharacter);
   socket.on("message", receiveMessage);
