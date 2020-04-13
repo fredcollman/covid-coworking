@@ -6,6 +6,7 @@ const ctx = canvas.getContext("2d");
 const socket = io();
 
 const maxSpeed = 1;
+const touchRegionScale = 0.2;
 let lastTime = 0;
 const player = {
   size: { x: 40, y: 100 },
@@ -160,7 +161,7 @@ const loopForever = (callback) => {
   window.requestAnimationFrame(loop);
 };
 
-const receiveInput = (handlers) => (event) => {
+const receiveKeyboardInput = (handlers) => (event) => {
   switch (event.keyCode) {
     case 37:
       return handlers.left();
@@ -170,6 +171,20 @@ const receiveInput = (handlers) => (event) => {
       return handlers.right();
     case 40:
       return handlers.down();
+  }
+};
+
+const receiveMouseEvent = (handlers) => (event) => {
+  const { top, left, width, height } = event.target.getBoundingClientRect();
+  if (event.clientX < left + touchRegionScale * width) {
+    handlers.left();
+  } else if (event.clientX > left + (1 - touchRegionScale) * width) {
+    handlers.right();
+  }
+  if (event.clientY < top + touchRegionScale * height) {
+    handlers.up();
+  } else if (event.clientY > top + (1 - touchRegionScale) * height) {
+    handlers.down();
   }
 };
 
@@ -209,8 +224,10 @@ const init = () => {
     color: randomColor(),
   });
   loopForever(tick);
-  document.addEventListener("keydown", receiveInput(downHandlers));
-  document.addEventListener("keyup", receiveInput(upHandlers));
+  document.addEventListener("keydown", receiveKeyboardInput(downHandlers));
+  document.addEventListener("keyup", receiveKeyboardInput(upHandlers));
+  canvas.addEventListener("mousedown", receiveMouseEvent(downHandlers));
+  canvas.addEventListener("mouseup", receiveMouseEvent(upHandlers));
   socket.on("receivePosition", receivePosition);
   socket.on("updateCharacter", updateCharacter);
   socket.on("message", receiveMessage);
