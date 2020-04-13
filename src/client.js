@@ -35,6 +35,10 @@ const updatePlayer = ({ name, color }) => {
   socket.emit("character", { name, color });
 };
 
+const join = () => {
+  socket.emit("arrive", { player });
+};
+
 const newPosition = (deltaTime) => ({
   x: player.position.x + player.speed.x * deltaTime,
   y: player.position.y + player.speed.y * deltaTime,
@@ -91,6 +95,13 @@ const updateCharacter = (received) => {
 
 const destroyPlayer = (received) => {
   otherPlayers.delete(received.player.id);
+};
+
+const acknowledgeCharacter = (received) => {
+  console.log(received);
+  receivePosition(received);
+  updateCharacter(received);
+  socket.emit("welcome", { id: received.player.id, player });
 };
 
 const makePenguin = (color) => {
@@ -406,10 +417,7 @@ const stopHandlers = {
 };
 
 const init = () => {
-  updatePlayer({
-    name: "bob",
-    color: randomColor(),
-  });
+  join();
   buildWalls();
   loopForever(tick);
   document.addEventListener("keydown", receiveKeyboardInput(startHandlers));
@@ -424,6 +432,7 @@ const init = () => {
   socket.on("updateCharacter", updateCharacter);
   socket.on("message", receiveMessage);
   socket.on("destroyPlayer", destroyPlayer);
+  socket.on("newCharacter", acknowledgeCharacter);
   characterForm.addEventListener("submit", (event) => {
     event.preventDefault();
     updatePlayer({
