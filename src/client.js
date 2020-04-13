@@ -7,6 +7,12 @@ const socket = io();
 
 const maxSpeed = 1;
 const touchRegionScale = 0.2;
+const solidWallWidth = 10;
+const walls = [
+  { x: 200, y: 30, dx: 700, dy: 50 },
+  { x: 500, y: 40, dx: -100, dy: 500 },
+];
+
 let lastTime = 0;
 const player = {
   size: { x: 40, y: 100 },
@@ -113,6 +119,54 @@ const makePenguin = (color) => {
   return svg;
 };
 
+const drawWall = (wall) => {
+  ctx.beginPath();
+  ctx.lineWidth = solidWallWidth;
+  ctx.moveTo(wall.x, wall.y);
+  ctx.lineTo(wall.x + wall.dx, wall.y + wall.dy);
+  ctx.stroke();
+};
+
+const checkLineIntersection = (lineA) => (lineB) => {
+  const determinant = lineB.dx * lineA.dy - lineA.dx * lineB.dy;
+  if (determinant === 0) return false; // parallel
+  const aFrac =
+    ((lineA.x - lineB.x) * lineA.dy - (lineA.y - lineB.y) * lineA.dx) /
+    determinant;
+  const bFrac =
+    ((lineA.x - lineB.x) * lineB.dy - (lineA.y - lineB.y) * lineB.dx) /
+    determinant;
+  const result = aFrac >= 0 && aFrac <= 1 && bFrac >= 0 && bFrac <= 1;
+  return result;
+};
+
+const checkWallIntersection = (char, wall) => {
+  if (
+    wall.x >= char.position.x &&
+    wall.x <= char.position.x + char.size.x &&
+    wall.y >= char.position.y &&
+    wall.y <= char.position.y + char.size.y
+  ) {
+    return true;
+  }
+  return [
+    { x: char.position.x, y: char.position.y, dx: char.size.x, dy: 0 }, // top
+    {
+      x: char.position.x,
+      y: char.position.y + char.size.y,
+      dx: char.size.x,
+      dy: 0,
+    }, // bottom
+    { x: char.position.x, y: char.position.y, dx: 0, dy: char.size.y }, // left
+    {
+      x: char.position.x + char.size.x,
+      y: char.position.y,
+      dx: 0,
+      dy: char.size.y,
+    }, // right
+  ].some(checkLineIntersection(wall));
+};
+
 const drawSomeone = (char) => {
   ctx.fillStyle = char.color;
   ctx.textAlign = "center";
@@ -136,6 +190,7 @@ const drawSomeone = (char) => {
 
 const draw = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  walls.forEach(drawWall);
   otherPlayers.forEach(drawSomeone);
   drawSomeone(player);
 };
@@ -147,7 +202,11 @@ const tick = (timestamp) => {
     player.position.x !== oldPosition.x ||
     player.position.y !== oldPosition.y
   ) {
-    notifyPosition();
+    if (walls.some((wall) => checkWallIntersection(player, wall))) {
+      player.position = oldPosition;
+    } else {
+      notifyPosition();
+    }
   }
   lastTime = timestamp;
   draw(timestamp);
@@ -162,6 +221,7 @@ const loopForever = (callback) => {
 };
 
 const receiveKeyboardInput = (handlers) => (event) => {
+  event.preventDefault();
   switch (event.keyCode) {
     case 37:
       return handlers.left();
