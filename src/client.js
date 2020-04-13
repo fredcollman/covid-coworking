@@ -7,7 +7,7 @@ const socket = io();
 
 const maxSpeed = 1;
 const touchRegionScale = 0.2;
-const solidWallWidth = 10;
+const solidWallWidth = 2;
 const walls = [];
 
 let lastTime = 0;
@@ -161,29 +161,103 @@ const checkWallIntersection = (char) => (wall) => {
 const anyCollision = (walls) => (char) =>
   walls.some(checkWallIntersection(char));
 
-const buildWalls = () => {
-  let x = 200;
-  let y = 200;
+const buildWall = ({ x, y }, { dx = 0, dy = 0 }) => {
+  walls.push({ x, y, dx, dy });
+  return { x: x + dx, y: y + dy };
+};
+
+const buildOuterWalls = () =>
   [
     { dx: -600 },
-    { dy: 400 },
-    { dx: -500 },
-    { dy: -400 },
+    { dy: 350 },
+    { dx: -400 },
+    { dy: -350 },
     { dx: 300 },
-    { dy: -2000 },
-    { dx: -2000 },
-    { dy: -200 },
-    { dx: -1000 },
+    { dy: -700 },
+    { dx: -2500 },
+    { dy: -450 },
+    { dx: 400 },
+    { dy: -250 },
+    { dx: 2860 },
+    { dx: -60, dy: 1200 },
     { dy: 200 },
-    { dx: -2000 },
-    { dy: -1500 },
-    { dx: 5800 },
-    { dy: 3500 },
-  ].forEach(({ dx = 0, dy = 0 }) => {
-    walls.push({ x, y, dx, dy });
-    x += dx;
-    y += dy;
+  ].reduce(buildWall, { x: 200, y: 200 });
+
+const buildCamberwell = () =>
+  [
+    { dx: -150 },
+    { dy: -400 },
+    { dx: 400 },
+    { dy: 400 },
+    { dx: -150 },
+  ].reduce(buildWall, { x: -1650, y: -800 });
+
+const buildShoreditch = () =>
+  [
+    { dx: -150 },
+    { dy: -400 },
+    { dx: 400 },
+    { dy: 400 },
+    { dx: -150 },
+  ].reduce(buildWall, { x: -1250, y: -800 });
+
+const buildHampstead = () =>
+  [{ dy: -20 }, { dx: 250 }, { dy: 200 }, { dx: -250 }, { dy: -20 }].reduce(
+    buildWall,
+    {
+      x: -2050,
+      y: -1180,
+    }
+  );
+
+const buildBrixton = () =>
+  [{ dy: -20 }, { dx: 250 }, { dy: 200 }, { dx: -250 }, { dy: -20 }].reduce(
+    buildWall,
+    {
+      x: -2050,
+      y: -980,
+    }
+  );
+
+const buildGreenwich = () =>
+  [{ dy: 100 }, { dx: -150 }, { dy: -250 }, { dx: 150 }].reduce(buildWall, {
+    x: -2450,
+    y: -600,
   });
+
+const buildServerRoom = () =>
+  [{ dy: -100 }, { dx: 200 }, { dy: 100 }].reduce(buildWall, {
+    x: -1550,
+    y: -500,
+  });
+
+const buildKitchenDivider = () => {
+  buildWall({ x: -500, y: -500 }, { dx: 400 });
+  buildWall({ x: 100, y: -500 }, { dx: 125 });
+};
+
+const buildEntranceLoos = () => {
+  buildWall({ x: -800, y: 375 }, { dx: 300 });
+};
+
+const buildFireEscapeLoos = () => {
+  buildWall({ x: -2600, y: -800 }, { dy: 50 });
+  buildWall({ x: -3000, y: -750 }, { dx: 250 });
+  buildWall({ x: -2750, y: -790 }, { dy: 50 });
+  buildWall({ x: -3000, y: -620 }, { dx: 300 });
+};
+
+const buildWalls = () => {
+  buildOuterWalls();
+  buildCamberwell();
+  buildShoreditch();
+  buildHampstead();
+  buildBrixton();
+  buildGreenwich();
+  buildServerRoom();
+  buildKitchenDivider();
+  buildEntranceLoos();
+  buildFireEscapeLoos();
 };
 
 const charCenter = (char) => ({
@@ -217,7 +291,6 @@ const draw = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const center = charCenter(player);
   ctx.translate(canvas.width / 2 - center.x, canvas.height / 2 - center.y);
-  ctx.scale(0.2, 0.2);
   walls.forEach(drawWall);
   otherPlayers.forEach(drawSomeone);
   drawSomeone(player);
