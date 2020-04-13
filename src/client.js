@@ -8,18 +8,13 @@ const socket = io();
 const maxSpeed = 1;
 const touchRegionScale = 0.2;
 const solidWallWidth = 10;
-const walls = [
-  { x: 50, y: 50, dx: 1000, dy: 0 },
-  { x: 1050, y: 50, dx: 0, dy: 450 },
-  { x: 1050, y: 500, dx: -1000, dy: 0 },
-  { x: 50, y: 500, dx: 0, dy: -450 },
-];
+const walls = [];
 
 let lastTime = 0;
 const player = {
   size: { x: 40, y: 100 },
   color: "#000",
-  position: { x: 100, y: 100 },
+  position: { x: 0, y: 0 },
   speed: { x: 0, y: 0 },
   name: "",
   message: null,
@@ -166,6 +161,31 @@ const checkWallIntersection = (char) => (wall) => {
 const anyCollision = (walls) => (char) =>
   walls.some(checkWallIntersection(char));
 
+const buildWalls = () => {
+  let x = 200;
+  let y = 200;
+  [
+    { dx: -600 },
+    { dy: 400 },
+    { dx: -500 },
+    { dy: -400 },
+    { dx: 300 },
+    { dy: -2000 },
+    { dx: -2000 },
+    { dy: -200 },
+    { dx: -1000 },
+    { dy: 200 },
+    { dx: -2000 },
+    { dy: -1500 },
+    { dx: 5800 },
+    { dy: 3500 },
+  ].forEach(({ dx = 0, dy = 0 }) => {
+    walls.push({ x, y, dx, dy });
+    x += dx;
+    y += dy;
+  });
+};
+
 const charCenter = (char) => ({
   x: char.position.x + char.size.x / 2,
   y: char.position.y + char.size.y / 2,
@@ -197,6 +217,7 @@ const draw = (timestamp) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const center = charCenter(player);
   ctx.translate(canvas.width / 2 - center.x, canvas.height / 2 - center.y);
+  ctx.scale(0.2, 0.2);
   walls.forEach(drawWall);
   otherPlayers.forEach(drawSomeone);
   drawSomeone(player);
@@ -316,6 +337,7 @@ const init = () => {
     name: "bob",
     color: randomColor(),
   });
+  buildWalls();
   loopForever(tick);
   document.addEventListener("keydown", receiveKeyboardInput(startHandlers));
   document.addEventListener("keyup", receiveKeyboardInput(stopHandlers));

@@ -46,7 +46,7 @@ const handleDisconnect = (socket) => () => {
 
 io.on("connection", (socket) => {
   console.log(`[${socket.id}] user connected`);
-  updatePosition(socket)({ x: 100, y: 100 });
+  updatePosition(socket)({ x: 0, y: 0 });
   socket.on("character", updateCharacter(socket));
   socket.on("position", updatePosition(socket));
   socket.on("message", broadcastMessage(socket));
