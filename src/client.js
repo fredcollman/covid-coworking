@@ -9,8 +9,10 @@ const maxSpeed = 1;
 const touchRegionScale = 0.2;
 const solidWallWidth = 10;
 const walls = [
-  { x: 200, y: 30, dx: 700, dy: 50 },
-  { x: 500, y: 40, dx: -100, dy: 500 },
+  { x: 50, y: 50, dx: 1000, dy: 0 },
+  { x: 1050, y: 50, dx: 0, dy: 450 },
+  { x: 1050, y: 500, dx: -1000, dy: 0 },
+  { x: 50, y: 500, dx: 0, dy: -450 },
 ];
 
 let lastTime = 0;
@@ -38,13 +40,13 @@ const updatePlayer = ({ name, color }) => {
   socket.emit("character", { name, color });
 };
 
-const constrain = (idealPosition) => ({
+const constrainCanvas = (idealPosition) => ({
   x: Math.max(0, Math.min(canvas.width - player.size.x, idealPosition.x)),
   y: Math.max(0, Math.min(canvas.height - player.size.y, idealPosition.y)),
 });
 
 const newPosition = (deltaTime) =>
-  constrain({
+  constrainCanvas({
     x: player.position.x + player.speed.x * deltaTime,
     y: player.position.y + player.speed.y * deltaTime,
   });
@@ -140,7 +142,7 @@ const checkLineIntersection = (lineA) => (lineB) => {
   return result;
 };
 
-const checkWallIntersection = (char, wall) => {
+const checkWallIntersection = (char) => (wall) => {
   if (
     wall.x >= char.position.x &&
     wall.x <= char.position.x + char.size.x &&
@@ -166,6 +168,9 @@ const checkWallIntersection = (char, wall) => {
     }, // right
   ].some(checkLineIntersection(wall));
 };
+
+const anyCollision = (walls) => (char) =>
+  walls.some(checkWallIntersection(char));
 
 const drawSomeone = (char) => {
   ctx.fillStyle = char.color;
@@ -202,7 +207,7 @@ const tick = (timestamp) => {
     player.position.x !== oldPosition.x ||
     player.position.y !== oldPosition.y
   ) {
-    if (walls.some((wall) => checkWallIntersection(player, wall))) {
+    if (anyCollision(walls)(player)) {
       player.position = oldPosition;
     } else {
       notifyPosition();
