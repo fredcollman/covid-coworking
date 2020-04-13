@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = sockets(server);
 
-app.use(express.static("."));
+app.use("/office", express.static("."));
 
 const updateCharacter = (socket) => ({ name, color }) => {
   console.log(`[${socket.id}] user name: ${name}, color: ${color}`);
