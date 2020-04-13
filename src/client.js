@@ -95,17 +95,29 @@ const destroyPlayer = (received) => {
   otherPlayers.delete(received.player.id);
 };
 
+const makePenguin = (color) => {
+  const svg = new Image();
+  svg.src = `data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="40" height="100">
+  <polygon points="12, 80 12, 92 4, 100 12, 100 15, 93 15, 80" fill="${color}"/>
+  <polygon points="25, 80 25, 92 19, 100 26, 100 28, 93 28, 80" fill="${color}"/>
+  <ellipse cx="20" cy="55" rx="20" ry="35" fill="#336" />
+  <ellipse cx="20" cy="55" rx="14" ry="32" fill="white" />
+  <ellipse cx="20" cy="15" rx="15" ry="15" fill="#336" />
+  <ellipse cx="15" cy="12" rx="2" ry="2" fill="white" />
+  <ellipse cx="15" cy="12.2" rx="1" ry="1.2" fill="#000" />
+  <ellipse cx="25" cy="12" rx="2" ry="2" fill="white" />
+  <ellipse cx="25" cy="12.2" rx="1" ry="1.2" fill="#000" />
+  <path d="M21.5, 19 A2.3, 2.3, 45, 0, 0, 19, 16 L12, 25 Z" fill="${color}" stroke="white" stroke-width="1"/>
+</svg>`.replace(/#/g, "%23");
+  return svg;
+};
+
 const drawSomeone = (char) => {
   ctx.fillStyle = char.color;
   ctx.textAlign = "center";
   ctx.font =
     '24px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif';
-  // ctx.fillRect(char.position.x, char.position.y, char.size.x, char.size.y);
-  ctx.drawImage(
-    document.getElementById("penguin"),
-    char.position.x,
-    char.position.y
-  );
+  ctx.drawImage(makePenguin(char.color), char.position.x, char.position.y);
   ctx.fillText(
     char.name,
     char.position.x + char.size.x / 2,

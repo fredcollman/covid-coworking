@@ -14,7 +14,3 @@ body > * {
   max-height: 80vh;
   max-width: 80vw;
 }
-
-#penguin {
-  display: none;
-}
