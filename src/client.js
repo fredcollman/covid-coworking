@@ -190,12 +190,28 @@ const receiveMouseEvent = (handlers) => (event) => {
   }
 };
 
+const receiveTouchEvent = (handlers) => (event) => {
+  [...event.targetTouches].forEach((touch) => {
+    const { top, left, width, height } = touch.target.getBoundingClientRect();
+    if (touch.clientX < left + touchRegionScale * width) {
+      handlers.left();
+    } else if (touch.clientX > left + (1 - touchRegionScale) * width) {
+      handlers.right();
+    }
+    if (touch.clientY < top + touchRegionScale * height) {
+      handlers.up();
+    } else if (touch.clientY > top + (1 - touchRegionScale) * height) {
+      handlers.down();
+    }
+  });
+};
+
 const stop = () => {
   player.speed.x = 0;
   player.speed.y = 0;
 };
 
-const downHandlers = {
+const startHandlers = {
   left: () => {
     player.speed.x = -maxSpeed;
   },
@@ -210,7 +226,7 @@ const downHandlers = {
   },
 };
 
-const upHandlers = {
+const stopHandlers = {
   left: () => {
     player.speed.x = Math.max(0, player.speed.x);
   },
@@ -231,11 +247,14 @@ const init = () => {
     color: randomColor(),
   });
   loopForever(tick);
-  document.addEventListener("keydown", receiveKeyboardInput(downHandlers));
-  document.addEventListener("keyup", receiveKeyboardInput(upHandlers));
-  canvas.addEventListener("mousedown", receiveMouseEvent(downHandlers));
-  canvas.addEventListener("mousemove", receiveMouseEvent(downHandlers));
+  document.addEventListener("keydown", receiveKeyboardInput(startHandlers));
+  document.addEventListener("keyup", receiveKeyboardInput(stopHandlers));
+  canvas.addEventListener("mousedown", receiveMouseEvent(startHandlers));
+  canvas.addEventListener("mousemove", receiveMouseEvent(startHandlers));
   canvas.addEventListener("mouseup", stop);
+  canvas.addEventListener("touchstart", receiveTouchEvent(startHandlers));
+  canvas.addEventListener("touchmove", receiveTouchEvent(startHandlers));
+  canvas.addEventListener("touchend", stop);
   socket.on("receivePosition", receivePosition);
   socket.on("updateCharacter", updateCharacter);
   socket.on("message", receiveMessage);
